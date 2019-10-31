@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_drush_help().
+ * Implements hook_drush_help().
  */
 function searchindex_wipe_drush_help($section) {
   switch ($section) {

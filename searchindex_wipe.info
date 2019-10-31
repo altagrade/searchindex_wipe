@@ -1,5 +1,6 @@
-name = SearchIndex Wipe
+name = Search Index Wipe
 description = Enables wiping of search index.
 dependencies[] = search
 package = search
-core = 7.x
+backdrop = 1.x
+type = module

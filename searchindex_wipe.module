@@ -12,7 +12,7 @@ function searchindex_wipe_menu() {
   // Confirmation form to wipe search index.
   $items['admin/searchindex_wipe'] = array(
     'title' => 'Clear Index',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('searchindex_wipe_confirm'),
     'access arguments' => array('wipe search index'),
     'type' => MENU_CALLBACK,
@@ -38,12 +38,27 @@ function searchindex_wipe_permission() {
  */
 function searchindex_wipe_form_search_admin_settings_alter(&$form, &$form_state) {
   if (user_access('wipe search index')) {
-    $form['status']['clear_index'] = array(
-      '#value' => t('Wipe Index'),
-      '#type' => 'submit',
-      '#submit' => array('searchindex_wipe_all'),
-      '#description' => t('Drops all the index build by search module'),
-    );
+    if ($form['indexing']['wipe']) {
+      $invalidate = $form['indexing']['wipe'];
+      unset($form['indexing']['wipe']);
+      $status = $form['indexing']['status'];
+      unset($form['indexing']['status']);
+      $description = $form['indexing']['#description'];
+      unset($form['indexing']['#description']);
+      $form['status'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Indexing status',
+        'status' => $status,
+        '#description' => $description,
+        'invalidate' => $invalidate,
+        'wipe' => array(
+          '#value' => t('Wipe Index'),
+          '#type' => 'submit',
+          '#submit' => array('searchindex_wipe_all'),
+          '#description' => t('Drops all the index build by search module'),
+        ),
+      );
+    }
   }
 }
 
@@ -69,6 +84,11 @@ function searchindex_wipe_help($path, $arg) {
  * Confirmation form.
  */
 function searchindex_wipe_confirm($form, $form_state) {
+  $form['status'] = array(
+    '#prefix' => '<p>',
+    '#suffix' => '</p>',
+    '#markup' => t('This will effectively drop all the search index built so far by Search module.'),
+  );
   return confirm_form($form, t('Are you sure you want to clear Search index?'), "admin/config/search/settings", t('This action cannot be undone.'), t('Delete'), t('Cancel')
   );
 }
@@ -83,12 +103,15 @@ function searchindex_wipe_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/search/settings';
 }
 
+/**
+ * Trancate the search index table.
+ */
 function searchindex_wipe_truncate_table() {
-  // Taken code from drupal_uninstall_schema.
-  $schema = drupal_get_schema_unprocessed('search');
+  // Taken code from backdrop_uninstall_schema.
+  $schema = backdrop_get_schema_unprocessed('search');
   foreach ($schema as $table_name => $table) {
     // Truncate search related tables.
     db_truncate($table_name)->execute();
   }
-  drupal_set_message(t('Search Index Cleared, Please rebuilt the index by running cron.'));
+  backdrop_set_message(t('Search Index cleared. Please rebuilt the index by running cron.'));
 }
