@@ -55,7 +55,7 @@ function searchindex_wipe_form_search_admin_settings_alter(&$form, &$form_state)
           '#value' => t('Wipe Index'),
           '#type' => 'submit',
           '#submit' => array('searchindex_wipe_all'),
-          '#description' => t('Drops all the index build by search module'),
+          '#description' => t('Drops all the index built by search module'),
         ),
       );
     }
@@ -113,5 +113,5 @@ function searchindex_wipe_truncate_table() {
     // Truncate search related tables.
     db_truncate($table_name)->execute();
   }
-  backdrop_set_message(t('Search Index cleared. Please rebuilt the index by running cron.'));
+  backdrop_set_message(t('Search Index cleared. Please rebuild the index by running cron.'));
 }
